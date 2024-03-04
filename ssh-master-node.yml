@@ -1,0 +1,10 @@
+---
+- name: To generate public key for remote connection in master node.
+  host: app_server
+  become:
+  task:
+  - name: Run ssh-keygen command
+    ansible.builtin.shell:
+      cmd: ssh-keygen -t rsa -b 4096 -N ""
+    args:
+      creates: ~/.ssh/id_rsa  # Check if the key pair already exists

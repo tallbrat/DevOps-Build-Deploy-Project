@@ -1,0 +1,117 @@
+// JENKINS CI PIPELINE/
+// Purpose: The Code will be built into executable file (.jar) & pushed to Dockerhub
+// NOTE:
+//  i. Store Dockerhub, EC2 pem key credentials in Jenkins Server
+// ii. Install 'ssh agent' plugin in Jenkins
+
+pipeline {
+    agent any
+    // DECLARE THE VARIABLES HERE:
+    environment {
+        DOCKER_USERNAME = "tallbrat"     // check the 'ID' in your Jenkins credentials
+        JOB = env.JOB_NAME.toLowerCase()           // Convert Jenkins Job name to lower-case if needed.
+
+    }
+
+    stages {
+        stage("1. Cleanup") {
+            // Clean workspace directory for the current build
+            steps {
+                deleteDir ()             
+            }
+        }
+
+        stage ('2. Git Checkout') {
+            // This clone the git to the specific directory
+            steps {
+                dir ("Devops-Project"){
+                  script {
+                    git branch: 'main', url: 'https://github.com/tallbrat/devops-project.git' 
+                  }
+                }
+            }
+        }   
+        
+        stage("3. Maven Unit Test") {  
+            // Test the individual units of code 
+            steps{
+                dir ("Devops-Project"){
+                  sh 'mvn test'        
+                }
+            }
+        }
+
+        stage('4. Maven Build') {
+            // Build the application into an executable file (.jar)
+            steps{
+                dir ("Devops-Project"){
+                  sh 'mvn clean package'   
+                }
+            }
+        }
+
+        stage("5. Maven Integration Test") {
+            // Test the interaction between different units of code
+            // when components (database access, service calls(API),etc) are be specified in SC
+            steps{
+                dir ("Devops-Project"){
+                  sh 'mvn verify'          
+                }
+            }
+        }
+
+        stage('6. DevopsProject1') {
+            // Build Docker Image 
+            steps{
+                dir('Devops-Project') {      // go to directory where 'Dockerfile' is stored
+                    script {
+                      sh "docker build -t ${JOB}:${BUILD_NUMBER} ."  // 'JOB_NAME' & 'BUILD_NUMBER' are Jenkins Global variable
+                    }
+                }
+            }
+        }
+        
+        stage('7. Trivy Image Scan') {
+            // Scan Docker images for vulnerabilities 
+            steps{
+                script { 
+                  sh "trivy image ${DOCKER_USERNAME}/${JOB}:v${BUILD_NUMBER} > scan.txt"
+                }
+            }
+        }
+
+        stage('8. Docker Image Tag') {
+            // Rename the Docker Image before pushing to Dockerhub
+            steps{
+                dir('DevopsProject1') {      // go to directory where Docker Image is created
+                  script {
+                    sh "docker tag ${JOB}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${JOB}:v${BUILD_NUMBER}"
+                    sh "docker tag ${JOB}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${JOB}:latest"
+                  }
+                }
+            } 
+        }
+
+        stage('9. Docker Image Push') {
+            // Login to Dockerhub & Push the image to Dockerhub
+            steps{
+                script {
+                  withCredentials([usernamePassword(credentialsId: 'my_dockerhub_creds', usernameVariable: 'docker_user', passwordVariable: 'docker_pass')]) {
+                    sh "docker login -u '${docker_user}' -p '${docker_pass}'"
+                    sh "docker push ${DOCKER_USERNAME}/${JOB}:v${BUILD_NUMBER}"
+                    sh "docker push ${DOCKER_USERNAME}/${JOB}:latest"
+                  }
+                }
+            }
+        }
+
+        stage('10. Docker Image Cleanup') {
+            // Remove the unwanted (dangling) images created in Jenkins Server to free-up space
+            steps{
+                script {
+                  sh "docker image prune -af"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,12 @@
+---
+- name: To install all the requried tool for k8s server
+  host: app_server
+  become: yes
+  tasks:
+    - name: update_cache
+      apt:
+        update_cache: yes
+  roles:
+    - docker
+    - kubectl
+    - minikube

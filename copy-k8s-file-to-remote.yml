@@ -1,0 +1,24 @@
+---
+- name: Deploy K8s pods and services using .yml files in the remote server.
+  host: web_server
+  become: yes
+  tasks:
+    - name: Empty the folder before copying the files.
+      ansible.builtin.file:
+        path: /home/ec2-user/
+        state: absent
+        recurse: yes
+
+    - name: Copy .yml file to the remote server
+      ansible.builtin.copy:
+        src: /var/lib/jenkins/workspace/CD-pipeline/Devops-Project/kubenentes-files/*.yml
+        dest: /home/ec2-user/
+
+    - name: Execute deployment scripts
+      ansible.builtin.shell:
+        cmd: |
+          kubectl apply -f /home/ec2-user/secrets.yaml
+          kubectl apply -f /home/ec2-user/configmap.yaml
+          kubectl apply -f /home/ec2-user/service.yaml
+          kubectl apply -f /home/ec2-user/deployment.yaml
+

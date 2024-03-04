@@ -1,0 +1,12 @@
+---
+- name: Install all the tool for the Jenkins server
+  host: web_server
+  become: yes
+  gather_facts: yes
+  roles:
+  - git
+  - jenkins
+  - docker
+  - trivy
+  - Ansible
+

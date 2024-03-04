@@ -1,0 +1,32 @@
+// JENKINS CD PIPELINE/
+// Purpose: Get the code from the git deploy the k8s using Ansible
+
+pipeline {
+  agent any
+  stages {
+      stage("1. Cleanup") {
+          // Clean workspace directory for the current deployment
+          steps {
+              deleteDir ()             
+          }
+      }
+
+      stage ('2. Git Checkout') {
+          // This clone the git to the specific directory
+          steps {
+              dir ("Devops-Project"){
+                script {
+                  git branch: 'main', url: 'https://github.com/tallbrat/devops-project.git' 
+                }
+              }
+          }
+      }   
+      
+      stage("3. Deploy using Ansible") {  
+          // Test the individual units of code 
+          steps{
+                sh 'ansible-playbook -i dynamic_inventory.ini copy-k8s-file-to-remote.yml'
+          }
+      }
+  }
+}

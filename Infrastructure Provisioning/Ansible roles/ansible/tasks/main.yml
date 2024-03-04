@@ -1,0 +1,27 @@
+---
+- name: Install required packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - software-properties-common
+    - python3-pip
+
+- name: Add Ansible repository
+  apt_repository:
+    repo: "ppa:ansible/ansible"
+    state: present
+    update_cache: yes
+
+- name: Install Ansible
+  apt:
+    name: ansible
+    state: present
+
+- name: Install Python libraries
+  pip:
+    name:
+      - boto
+      - boto3
+    state: present
+    executable: pip3

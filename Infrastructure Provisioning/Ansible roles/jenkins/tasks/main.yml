@@ -1,0 +1,30 @@
+---
+#Debian/Ubuntu
+#REF link: https://www.jenkins.io/doc/book/installing/linux/
+- name: Install Java, Jenkins dependency
+  apt:
+    name: fontconfig openjdk-17-jre
+    state: present
+- name: Add an Apt signing key to a specific keyring file
+  apt_key:
+    url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+    keyring: /usr/share/keyrings/jenkins-keyring.asc
+
+- name: Add jenkins repository into sources list
+  apt_repository:
+    repo: deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/
+    filename: jenkins.list
+
+- name: Update the repo and install jenkins
+  apt:
+    name: jenkins
+    state: latest
+    update_cache: yes
+
+- name: Start jenkins service
+  service:
+    name: jenkins
+    start: started
+    enabled: yes
+
+

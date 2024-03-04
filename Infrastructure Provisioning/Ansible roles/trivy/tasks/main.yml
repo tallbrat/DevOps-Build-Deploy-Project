@@ -1,0 +1,30 @@
+---
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - wget
+        - apt-transport-https
+        - gnupg
+        - lsb-release
+
+    - name: Add Trivy's GPG key
+      shell: wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+      args:
+        creates: /etc/apt/trusted.gpg.d/trivy.gpg
+
+    - name: Add Trivy repository
+      lineinfile:
+        path: /etc/apt/sources.list.d/trivy.list
+        line: "deb https://aquasecurity.github.io/trivy-repo/deb {{ ansible_distribution_release }} main"
+        create: yes
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Trivy
+      apt:
+        name: trivy
+        state: present

@@ -1,0 +1,11 @@
+---
+#REF link: https://minikube.sigs.k8s.io/docs/start/
+- name: Download Minikube latest release
+  get_url:
+    url: https://storage.googleapis.com/minikube/releases/latest/minikube_latest_amd64.deb
+    dest: /tmp/minikube_latest_amd64.deb
+
+- name: Install Minikube
+  apt:
+    deb: /tmp/minikube_latest_amd64.deb
+    become: yes
