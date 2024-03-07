@@ -75,7 +75,7 @@ pipeline {
             // Scan Docker images for vulnerabilities 
             steps{
                 script { 
-                  sh "trivy image ${DOCKER_USERNAME}/${JOB}:v${BUILD_NUMBER} > scan.txt"
+                  sh "trivy image ${JOB}:${BUILD_NUMBER} > scan.txt"
                 }
             }
         }
@@ -83,7 +83,7 @@ pipeline {
         stage('8. Docker Image Tag') {
             // Rename the Docker Image before pushing to Dockerhub
             steps{
-                dir('DevopsProject1') {      // go to directory where Docker Image is created
+                dir('Devops-Project') {      // go to directory where Docker Image is created
                   script {
                     sh "docker tag ${JOB}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${JOB}:v${BUILD_NUMBER}"
                     sh "docker tag ${JOB}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${JOB}:latest"
