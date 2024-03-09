@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mydeployment
+spec:
+  replica: 1
+  selector:
+    matchlabel:
+      name: myapp
+  template:
+    matadata:
+      label:
+        app: myapp
+    spec:
+      container:
+      - name: myapp
+        image: tallbrat/<build tile>:latest
+        port:
+        - containerPort: 8080
+      imagePullSecrets:
+      - name: docker-Hub-Cred

@@ -4,7 +4,7 @@ resource "aws_subnet" "my_subnet  " {
   cidr_block        = "${module.vpc.vpc_cidr_prefix}${count.index + 1}.0/24"
   availability_zone = element(var.availability_zones, count.index / var.subnets_per_az)
   tags = {
-    Name = "${var.subnet_type[count.index / var.number-of-public-subnet]}-subnet-${var.availability_zones[count.index / var.subnets_per_az]}-${count.index % var.subnets_per_az + 1}"
+    Name = "${var.subnet_type[count.index / var.number-of-private-subnet]}-subnet-${var.availability_zones[count.index / var.subnets_per_az]}-${count.index % var.subnets_per_az + 1}"
   }
 }
 

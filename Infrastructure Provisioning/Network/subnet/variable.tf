@@ -1,12 +1,12 @@
-variable "vpc_id" {}
+//variable "vpc_id" {}
 variable "availability_zones" {}
 //variable "vpc_id" {}
 variable "subnets_per_az" {}
-variable "vpc_cidr_prefix" {
-  type    = string
-}
+//variable "vpc_cidr_prefix" {
+  //type    = string
+//}
 variable "subnet_type" {
   type    = list(string)
-  default = [ "public", "private" ]
+  default = [ "private", "public" ]
 }
-variable "number-of-public-subnet" {}  //from subnet-global-(variable)
+variable "number-of-private-subnet" {}  //from subnet-global-(variable)
